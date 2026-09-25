@@ -1,4 +1,5 @@
 name: "CI/CD Pipeline"
+
 on:
   push:
     branches-ignore:
@@ -17,11 +18,29 @@ on:
       - 'LICENSE'
       - 'data/static/i18n/*.json'
       - 'frontend/src/assets/i18n/*.json'
+
 env:
   NODE_DEFAULT_VERSION: 24
   NODE_OPTIONS: "--max_old_space_size=4096"
   CYCLONEDX_NPM_VERSION: '^2.0.0||^3.0.0||^4.0.0'   # keep in sync with package.json
+
 jobs:
+  dependency-scan:
+    name: "Dependency Scan (npm audit)"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Check out Git repository"
+        uses: actions/checkout@v4
+
+      - name: "Use Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: "Run Dependency Security Gate"
+        run: |
+          npm audit --audit-level=high
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +57,7 @@ jobs:
           npm install --ignore-scripts
       - name: "Lint source code"
         run: npm run lint
+
   coding-challenge-rsn:
     runs-on: windows-latest
     steps:
@@ -51,6 +71,7 @@ jobs:
         run: npm install
       - name: "Check coding challenges for accidental code discrepancies"
         run: npm run rsn
+
   frontend-test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -90,6 +111,7 @@ jobs:
           name: frontend-test-lcov
           path: |
             frontend-lcov.info
+
   server-test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -127,6 +149,7 @@ jobs:
           name: server-test-lcov
           path: |
             server-lcov.info
+
   api-test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -165,6 +188,7 @@ jobs:
           name: api-test-lcov
           path: |
             api-lcov.info
+
   coverage-report:
     needs: [frontend-test, server-test, api-test]
     runs-on: ubuntu-latest
@@ -189,6 +213,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           files: frontend-lcov.info server-lcov.info api-lcov.info
+
   custom-config-test:
     runs-on: ubuntu-latest
     steps:
@@ -218,6 +243,7 @@ jobs:
             NODE_ENV=quiet npm run test:server &&
             NODE_ENV=tutorial npm run test:server &&
             NODE_ENV=unsafe npm run test:server
+
   e2e-test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -245,7 +271,7 @@ jobs:
           start: npm start
           wait-on: http://localhost:3000
           record: true
-          group: ${{ matrix.browser }} @ ${{ matrix.os }}
+          group: ${{ matrix.browser }} @${{ matrix.os }}
         env:
           SOLUTIONS_WEBHOOK: ${{ secrets.E2E_SOLUTIONS_WEBHOOK }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
@@ -260,12 +286,13 @@ jobs:
           start: npm start
           wait-on: http://localhost:3000
           record: true
-          group: ${{ matrix.browser }} @ ${{ matrix.os }}
+          group: ${{ matrix.browser }} @${{ matrix.os }}
         env:
           CYPRESS_CACHE_FOLDER: /Users/runner/Library/Caches/Cypress
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   smoke-test:
     runs-on: ubuntu-latest
     env:
@@ -303,6 +330,7 @@ jobs:
           cd ../..
           chmod +x test/smoke/smoke-test.sh
           test/smoke/smoke-test.sh http://localhost:3000
+
   docker-test:
     runs-on: ubuntu-latest
     steps:
@@ -310,6 +338,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
       - name: "Execute smoke test on Docker"
         run: docker compose -f docker-compose.test.yml up --exit-code-from sut
+
   docker:
     if: github.repository == 'juice-shop/juice-shop' && github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
     needs: [frontend-test, server-test, api-test, e2e-test, custom-config-test, docker-test]
@@ -348,6 +377,7 @@ jobs:
             VCS_REF=${{ env.VCS_REF }}
             BUILD_DATE=${{ env.BUILD_DATE }}
             CYCLONEDX_NPM_VERSION=${{ env.CYCLONEDX_NPM_VERSION }}
+
   heroku:
     if: github.repository == 'juice-shop/juice-shop' && github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
     needs: [frontend-test, server-test, api-test, e2e-test, custom-config-test]
@@ -373,6 +403,7 @@ jobs:
           heroku_app_name: ${{ env.HEROKU_APP }}
           heroku_email: bjoern.kimminich@owasp.org
           branch: ${{ env.HEROKU_BRANCH }}
+
   notify-slack:
     if: github.repository == 'juice-shop/juice-shop' && github.event_name == 'push' && (success() || failure())
     needs:

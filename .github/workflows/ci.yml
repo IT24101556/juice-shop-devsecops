@@ -48,21 +48,17 @@ jobs:
       - name: "Check out Git repository"
         uses: actions/checkout@v4
 
-      - name: "Set up Docker Buildx"
-        uses: docker/setup-buildx-action@v3
-
-      - name: "Build local Docker image"
+      - name: "Install Trivy"
         run: |
-          docker build -t juice-shop:test .
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
 
       - name: "Run Trivy Container Security Gate"
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          image-ref: 'juice-shop:test'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+        run: |
+          trivy image --exit-code 1 --severity HIGH,CRITICAL bkimminich/juice-shop:latest
 
   lint:
     runs-on: ubuntu-latest

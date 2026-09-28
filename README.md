@@ -38,6 +38,7 @@ For a detailed introduction, full list of features and architecture overview ple
 ## Table of contents
 
 - [Setup](#setup)
+    - [Assignment secrets management](#assignment-secrets-management)
     - [From Sources](#from-sources)
     - [Packaged Distributions](#packaged-distributions)
     - [Docker Container](#docker-container)
@@ -62,6 +63,86 @@ For a detailed introduction, full list of features and architecture overview ple
 > Some challenges require an AI/LLM provider to work properly. Check the
 > [_Setting up external dependencies_ documentation](https://pwning.owasp-juice.shop/companion-guide/snapshot/part1/running.html#_setting_up_external_dependencies)
 > for instructions on configuring local or cloud-based AI providers.
+
+### Assignment secrets management
+
+The application reads secrets from its process environment. No external-service
+credentials are required for basic startup. The root `.env.example` contains only
+empty placeholders:
+
+- `ALCHEMY_API_KEY`: optional Alchemy access for the Web3 challenges.
+- `LLM_API_KEY`: optional authentication for the configured LLM provider; the
+  default local Ollama configuration does not require this key.
+- `SOLUTIONS_WEBHOOK`: optional challenge-solution notification URL. Leave it
+  empty for the assignment demonstration. The application currently logs this
+  URL, so do not supply a credential-bearing URL without addressing that logging.
+- `CTF_KEY`: optional private override for CTF flag generation. An empty value
+  retains the bundled `ctf.key` training fallback.
+
+For local configuration, copy `.env.example` to `.env` in the repository root and
+edit only the values needed for your setup. Keep this file private. After installing
+dependencies and building the application, start it from the repository root with:
+
+```shell
+node --env-file=.env build/app
+```
+
+This command explicitly loads the file; `npm start` does **not** automatically
+load `.env`. Alternatively, set process environment variables before `npm start`.
+Existing process environment values take precedence over Node's environment file.
+
+For Docker Compose, run `docker compose up --build` from the repository root.
+Compose reads the root `.env` for interpolation, and the service explicitly passes
+the four variables to the container at runtime. Host environment values take
+precedence over `.env`. Missing or empty values retain the application's existing
+defaults; `.env` is not required for basic Compose startup. Git ignores `.env` and
+`.env.*` except `.env.example`. Docker excludes `.env` and `.env.*` at all directory
+levels, including `.env.example`, from the build context. These rules do not
+protect secrets stored under other filenames.
+Secrets must not be placed in Docker build arguments or image layers.
+
+#### GitHub Secrets demonstration
+
+After the separately approved repository configuration step, a collaborator can
+create `MEMBER3_DEMO_SECRET` under **Settings > Secrets and variables > Actions >
+New repository secret**. Use a private, disposable demonstration value with no
+external-service access. No Alchemy, LLM, webhook or CTF credential is needed.
+
+Once `secrets-management-demo.yml` exists on the default branch, select **Actions >
+Secrets Management Demonstration > Run workflow**. This manual workflow maps the
+GitHub encrypted secret into a step-scoped environment variable, fails if it is
+empty, and prints only a fixed success message. It performs no checkout and has
+no token permissions. It does not change the existing security gates.
+
+This proves GitHub Secret-to-workflow injection and presence, not application
+consumption or successful authentication with an external service. Application
+runtime provisioning uses the local or Compose paths described above. Existing
+CI references to `ALCHEMY_API_KEY` and `E2E_SOLUTIONS_WEBHOOK` do not establish that
+those repository secrets have been configured.
+
+#### Handling and evidence
+
+Never commit real credentials or paste them into commands, screenshots, reports
+or logs. Avoid environment dumps and expanded Compose configuration output when
+secrets are configured. Restrict repository access to trusted collaborators and
+replace secrets through their private configuration source when rotating them.
+If a real credential is disclosed, revoke or rotate it at its provider first and
+coordinate removal from exposed files and history; adding an ignore rule does
+not remove an already tracked secret.
+
+Capture the saved GitHub Secret **name only**, the workflow's fixed success
+message and commit reference, and runtime verification that reports only
+presence/success. In the assignment report (Sections 2.5 and 3.3), explain both
+provisioning paths, access and rotation, and the limits of the evidence. Document
+Member 3's contribution and AI assistance in the group contribution statement.
+The existing Gitleaks exceptions cover inherited training fixtures; they do not
+remove those values from history or establish that all assignment requirements
+are satisfied. Distinguish these fixtures from operational secrets and clarify
+their acceptability with the lecturer.
+
+References: [GitHub encrypted secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets),
+[Compose environment variables](https://docs.docker.com/compose/how-tos/environment-variables/set-environment-variables/),
+and [Node environment-file loading](https://nodejs.org/api/cli.html#--env-filefile).
 
 ### From Sources
 

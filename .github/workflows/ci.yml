@@ -58,7 +58,7 @@ jobs:
 
       - name: "Run Trivy Container Security Gate"
         run: |
-          trivy image --exit-code 1 --severity HIGH,CRITICAL bkimminich/juice-shop:latest || true
+          trivy image --exit-code 1 --severity HIGH,CRITICAL bkimminich/juice-shop:latest
 
   lint:
     runs-on: ubuntu-latest

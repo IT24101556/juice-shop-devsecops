@@ -21,7 +21,7 @@ export function searchProducts () {
     let criteria: any = req.query.q === 'undefined' ? '' : req.query.q ?? ''
     criteria = (criteria.length <= 200) ? criteria : criteria.substring(0, 200)
 
-    // Remediation: Contextual HTML entity encoding to mitigate Cross-Site Scripting (XSS)
+    // Member 2 Remediation: Contextual HTML entity encoding to mitigate Cross-Site Scripting (XSS)
     criteria = criteria
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -30,10 +30,18 @@ export function searchProducts () {
       .replace(/'/g, '&#x27;')
       .replace(/\//g, '&#x2F;')
 
-    models.sequelize.query(`SELECT * FROM Products WHERE ((name LIKE '%${criteria}%' OR description LIKE '%${criteria}%') AND deletedAt IS NULL) ORDER BY name`) // vuln-code-snippet vuln-line unionSqlInjectionChallenge dbSchemaChallenge
+    // Member 1 Remediation: Parameterized query using Sequelize replacements to eliminate SQL Injection (SQLi)
+    models.sequelize.query(
+      'SELECT * FROM Products WHERE ((name LIKE :searchQuery OR description LIKE :searchQuery) AND deletedAt IS NULL) ORDER BY name',
+      {
+        replacements: { searchQuery: `%${criteria}%` }
+      }
+    )
       .then(([products]: any) => {
+        // Defensive handling: ensures productList is always an iterable array
         const productList = Array.isArray(products) ? products : (products ? [products] : [])
         const dataString = JSON.stringify(productList)
+
         if (challengeUtils.notSolved(challenges.unionSqlInjectionChallenge)) { // vuln-code-snippet hide-start
           let solved = true
           UserModel.findAll().then(data => {
@@ -72,6 +80,7 @@ export function searchProducts () {
             }
           })
         } // vuln-code-snippet hide-end
+
         for (let i = 0; i < productList.length; i++) {
           productList[i].name = req.__(productList[i].name)
           productList[i].description = req.__(productList[i].description)

@@ -10,6 +10,7 @@ import * as models from '../models/index'
 import { UserModel } from '../models/user'
 import { challenges } from '../data/datacache'
 import * as challengeUtils from '../lib/challengeUtils'
+import { QueryTypes } from 'sequelize'
 
 class ErrorWithParent extends Error {
   parent: Error | undefined
@@ -30,20 +31,33 @@ export function searchProducts () {
       .replace(/'/g, '&#x27;')
       .replace(/\//g, '&#x2F;')
 
-    models.sequelize.query(`SELECT * FROM Products WHERE ((name LIKE '%${criteria}%' OR description LIKE '%${criteria}%') AND deletedAt IS NULL) ORDER BY name`) // vuln-code-snippet vuln-line unionSqlInjectionChallenge dbSchemaChallenge
+    models.sequelize.query(
+      'SELECT * FROM Products WHERE ((name LIKE :criteria OR description LIKE :criteria) AND deletedAt IS NULL) ORDER BY name',
+      {
+        replacements: { criteria: `%${criteria}%` },
+        type: QueryTypes.SELECT
+      }
+    )
       .then(([products]: any) => {
         const dataString = JSON.stringify(products)
+
         if (challengeUtils.notSolved(challenges.unionSqlInjectionChallenge)) { // vuln-code-snippet hide-start
           let solved = true
+
           UserModel.findAll().then(data => {
             const users = utils.queryResultToJson(data)
+
             if (users.data?.length) {
               for (let i = 0; i < users.data.length; i++) {
-                solved = solved && utils.containsOrEscaped(dataString, users.data[i].email) && dataString.includes(users.data[i].password)
+                solved = solved &&
+                  utils.containsOrEscaped(dataString, users.data[i].email) &&
+                  dataString.includes(users.data[i].password)
+
                 if (!solved) {
                   break
                 }
               }
+
               if (solved) {
                 challengeUtils.solve(challenges.unionSqlInjectionChallenge)
               }
@@ -52,29 +66,37 @@ export function searchProducts () {
             next(error)
           })
         }
+
         if (challengeUtils.notSolved(challenges.dbSchemaChallenge)) {
           let solved = true
+
           void models.sequelize.query('SELECT sql FROM sqlite_master').then(([data]: any) => {
             const tableDefinitions = utils.queryResultToJson(data)
+
             if (tableDefinitions.data?.length) {
               for (let i = 0; i < tableDefinitions.data.length; i++) {
                 if (tableDefinitions.data[i].sql) {
-                  solved = solved && utils.containsOrEscaped(dataString, tableDefinitions.data[i].sql)
+                  solved = solved &&
+                    utils.containsOrEscaped(dataString, tableDefinitions.data[i].sql)
+
                   if (!solved) {
                     break
                   }
                 }
               }
+
               if (solved) {
                 challengeUtils.solve(challenges.dbSchemaChallenge)
               }
             }
           })
         } // vuln-code-snippet hide-end
+
         for (let i = 0; i < products.length; i++) {
           products[i].name = req.__(products[i].name)
           products[i].description = req.__(products[i].description)
         }
+
         res.json(utils.queryResultToJson(products))
       }).catch((error: ErrorWithParent) => {
         next(error.parent)

@@ -39,7 +39,7 @@ jobs:
 
       - name: "Run Dependency Security Gate"
         run: |
-          npm audit --audit-level=high || true
+          npm audit --audit-level=high
 
   container-scan:
     name: "Container Image Scan (Trivy)"

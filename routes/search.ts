@@ -32,7 +32,8 @@ export function searchProducts () {
 
     models.sequelize.query(`SELECT * FROM Products WHERE ((name LIKE '%${criteria}%' OR description LIKE '%${criteria}%') AND deletedAt IS NULL) ORDER BY name`) // vuln-code-snippet vuln-line unionSqlInjectionChallenge dbSchemaChallenge
       .then(([products]: any) => {
-        const dataString = JSON.stringify(products)
+        const productList = Array.isArray(products) ? products : (products ? [products] : [])
+        const dataString = JSON.stringify(productList)
         if (challengeUtils.notSolved(challenges.unionSqlInjectionChallenge)) { // vuln-code-snippet hide-start
           let solved = true
           UserModel.findAll().then(data => {
@@ -71,11 +72,11 @@ export function searchProducts () {
             }
           })
         } // vuln-code-snippet hide-end
-        for (let i = 0; i < products.length; i++) {
-          products[i].name = req.__(products[i].name)
-          products[i].description = req.__(products[i].description)
+        for (let i = 0; i < productList.length; i++) {
+          productList[i].name = req.__(productList[i].name)
+          productList[i].description = req.__(productList[i].description)
         }
-        res.json(utils.queryResultToJson(products))
+        res.json(utils.queryResultToJson(productList))
       }).catch((error: ErrorWithParent) => {
         next(error.parent)
       })

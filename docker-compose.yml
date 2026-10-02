@@ -2,6 +2,11 @@ services:
   juice-shop:
     build: .
     container_name: juice-shop-compose
+    environment:
+      ALCHEMY_API_KEY: "${ALCHEMY_API_KEY:-}"
+      LLM_API_KEY: "${LLM_API_KEY:-}"
+      SOLUTIONS_WEBHOOK: "${SOLUTIONS_WEBHOOK:-}"
+      CTF_KEY: "${CTF_KEY:-}"
     ports:
       - "3000:3000"
     restart: unless-stopped

@@ -4,6 +4,7 @@
  */
 
 import { type Request, type Response, type NextFunction } from 'express'
+import jws from 'jws'
 import { ProductModel } from '../models/product'
 import { BasketModel } from '../models/basket'
 import * as challengeUtils from '../lib/challengeUtils'
@@ -15,11 +16,24 @@ import { challenges } from '../data/datacache'
 export function retrieveBasket () {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const token = utils.jwtFrom(req)
+      // The legacy JWT middleware accepts unsigned tokens; require the application's signing algorithm here.
+      if (jws.decode(token)?.header.alg !== 'RS256' || !security.verify(token)) {
+        return res.status(401).json({ error: 'Unauthorized' })
+      }
       const id = req.params.id
       const basket = await BasketModel.findOne({ where: { id }, include: [{ model: ProductModel, paranoid: false, as: 'Products' }] })
+      const user = security.authenticatedUsers.from(req)
+
+      if (!user) {
+        return res.status(401).json({ error: 'Unauthorized' })
+      }
+
+      if (basket && basket.UserId !== user.data.id) {
+        return res.status(403).json({ error: 'Not allowed' })
+      }
       /* jshint eqeqeq:false */
       challengeUtils.solveIf(challenges.basketAccessChallenge, () => {
-        const user = security.authenticatedUsers.from(req)
         return user && id && id !== 'undefined' && id !== 'null' && id !== 'NaN' && user.bid && user?.bid != parseInt(id, 10) // eslint-disable-line eqeqeq
       })
       if (((basket?.Products) != null) && basket.Products.length > 0) {

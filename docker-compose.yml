@@ -8,5 +8,9 @@ services:
       SOLUTIONS_WEBHOOK: "${SOLUTIONS_WEBHOOK:-}"
       CTF_KEY: "${CTF_KEY:-}"
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     restart: unless-stopped

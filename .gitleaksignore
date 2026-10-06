@@ -1,0 +1,129 @@
+# Reviewed IE3142 exceptions for the initial OWASP Juice Shop import.
+# Exact commit:file:rule:line fingerprints only; default detection rules remain enabled.
+# These exceptions accept historical training/test material, not production credentials.
+
+# Intentional seeded password and TOTP training credentials.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:data/static/users.yml:generic-api-key:88
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:data/static/users.yml:generic-api-key:151
+
+# JWT decoding test fixture.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:frontend/src/app/app.guard.spec.ts:jwt:46
+
+# Mocked OAuth password assertions; line 91 covers two findings.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:frontend/src/app/oauth/oauth.component.spec.ts:generic-api-key:91
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:frontend/src/app/oauth/oauth.component.spec.ts:generic-api-key:98
+
+# Public token-contract address, not a credential.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:frontend/src/app/faucet/faucet.component.ts:generic-api-key:34
+
+# Browser-storage JWT rendering test fixture.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:frontend/src/app/last-login-ip/last-login-ip.component.spec.ts:jwt:72
+
+# Browser-storage negative sanitization test fixture.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:frontend/src/app/last-login-ip/last-login-ip.component.spec.ts:generic-api-key:78
+
+# Intentional iacLeakedKeyChallenge private key; never use for deployment.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:infrastructure/terraform/networking.tf:private-key:171
+
+# Intentional OAuth password challenge completion check.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:routes/login.ts:generic-api-key:64
+
+# Inherited signing key retained for deliberately vulnerable training behavior.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:lib/insecurity.ts:private-key:21
+
+# Duplicate iacLeakedKeyChallenge private key; never use for deployment.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:terraform/networking.tf:private-key:171
+
+# Test-account login password fixtures.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/erasure-request.test.ts:generic-api-key:36
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/erasure-request.test.ts:generic-api-key:55
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/erasure-request.test.ts:generic-api-key:68
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/erasure-request.test.ts:generic-api-key:82
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/erasure-request.test.ts:generic-api-key:94
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/erasure-request.test.ts:generic-api-key:106
+
+# Test-account login password fixtures.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/basket.test.ts:generic-api-key:114
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/basket.test.ts:generic-api-key:170
+
+# Test-account login password fixtures.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/feedback.test.ts:generic-api-key:117
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/feedback.test.ts:generic-api-key:143
+
+# TOTP authentication test fixture.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/cypress/e2e/totpSetup.spec.ts:generic-api-key:7
+
+# Test-account login password fixtures.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/product-review.test.ts:generic-api-key:101
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/product-review.test.ts:generic-api-key:115
+
+# Test-account login password fixtures.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/data-export.test.ts:generic-api-key:53
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/data-export.test.ts:generic-api-key:73
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/data-export.test.ts:generic-api-key:90
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/data-export.test.ts:generic-api-key:110
+
+# Fixed TOTP seeds for test users and reproducible token generation.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:42
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:66
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:85
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:104
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:123
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:142
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:182
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:214
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:240
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:257
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:266
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:292
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:317
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:352
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:379
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/2fa.test.ts:generic-api-key:412
+
+# Authentication password test fixtures.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/login.test.ts:generic-api-key:147
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/login.test.ts:generic-api-key:245
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/login.test.ts:generic-api-key:267
+
+# Test-account login password fixture.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/chat.test.ts:generic-api-key:261
+
+# Deliberate forged-JWT challenge test fixtures.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/cypress/e2e/forgedJwt.spec.ts:jwt:7
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/cypress/e2e/forgedJwt.spec.ts:jwt:22
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/cypress/e2e/forgedJwt.spec.ts:jwt:38
+
+# TOTP generation input for login testing.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/cypress/e2e/login.spec.ts:generic-api-key:126
+
+# Public wallet key submitted as a negative test input.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/checkKeys.test.ts:generic-api-key:46
+
+# Public wallet address submitted as a negative test input.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/checkKeys.test.ts:generic-api-key:57
+
+# Intentional NFT-unlock challenge private-key fixture.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/checkKeys.test.ts:generic-api-key:68
+
+# Mock request-cookie and authenticated-user cache JWT fixtures.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/server/currentUser.unit.test.ts:jwt:31
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/server/currentUser.unit.test.ts:jwt:34
+
+# Authorization-header JWT test fixture.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/user.test.ts:jwt:280
+
+# Test-account login password fixtures.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/user.test.ts:generic-api-key:240
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/user.test.ts:generic-api-key:289
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/user.test.ts:generic-api-key:304
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/user.test.ts:generic-api-key:318
+
+# Same Authorization-header fixture also detected by the JWT rule.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/api/user.test.ts:generic-api-key:280
+
+# Mock authorization-header fixtures for JWT challenge verification.
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/server/verify.unit.test.ts:jwt:283
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/server/verify.unit.test.ts:jwt:291
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/server/verify.unit.test.ts:jwt:308
+60aa5dc699b3fc3622d0c26a3cd6f00ded8f6e35:test/server/verify.unit.test.ts:jwt:316
